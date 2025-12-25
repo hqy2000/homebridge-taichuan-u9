@@ -1,150 +1,129 @@
+# Homebridge Taichuan U9
 
-<p align="center">
+通过 **HomeKit** 解锁太川 Taichuan U9 小区单元楼门禁。  
+搭配 **Home Hub**（Apple TV / HomePod / iPad）可实现 **远程解锁小区门禁**。
 
-<img src="https://github.com/homebridge/branding/raw/master/logos/homebridge-wordmark-logo-vertical.png" width="150">
-
-</p>
+> 本插件通过模拟门禁 Pad 的呼叫与解锁流程，使门禁在 HomeKit 中表现为一个可控设备。
 
 
-# Homebridge Platform Plugin Template
 
-This is a template Homebridge platform plugin and can be used as a base to help you get started developing your own plugin.
+## 功能特性
 
-This template should be used in conjunction with the [developer documentation](https://developers.homebridge.io/). A full list of all supported service types, and their characteristics is available on this site.
+- 🔓 在 HomeKit 中一键解锁单元楼门禁  
+- 🌍 配合 Home Hub 支持远程解锁  
+- 🏠 无需改动门禁硬件  
+- 🔌 作为 Homebridge 插件运行，易于集成  
 
-## Clone As Template
 
-Click the link below to create a new GitHub Repository using this template, or click the *Use This Template* button above.
 
-<span align="center">
+## 所需材料
 
-### [Create New Repository From Template](https://github.com/homebridge/homebridge-plugin-template/generate)
+- [ ] 一台可运行 **Homebridge** 的设备  
+  - 树莓派  
+  - NAS  
+  - x86 主机等  
+- [ ] 一台 **支持双 WAN / 多接口的路由器**  
+  - 已刷 **OpenWRT**
 
-</span>
 
-## Setup Development Environment
 
-To develop Homebridge plugins you must have Node.js 12 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
+## 网络与设备准备
 
-* [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint)
+### 1. 获取门禁 Pad 的 IP 地址
 
-## Install Development Dependencies
+- 门禁 Pad 在 **WiFi 设置** 或 **工程设置** 中通常配置为 **静态 IP**
+- 记录该 IP 地址
+- 工程设置默认密码一般为：
+  - `1234` 或 `123456`
+- 若无法进入工程设置，请联系物业确认
 
-Using a terminal, navigate to the project folder and run this command to install the development dependencies:
 
-```
-npm install
-```
 
-## Update package.json
+### 2. 获取单元楼门禁主机的 IP 地址
 
-Open the [`package.json`](./package.json) and change the following attributes:
+- 在门禁 Pad 的 **工程设置** 中可查看
+- 记录对应的单元楼门禁 IP 地址
 
-* `name` - this should be prefixed with `homebridge-` or `@username/homebridge-` and contain no spaces or special characters apart from a dashes
-* `displayName` - this is the "nice" name displayed in the Homebridge UI
-* `repository.url` - Link to your GitHub repo
-* `bugs.url` - Link to your GitHub repo issues page
 
-When you are ready to publish the plugin you should set `private` to false, or remove the attribute entirely.
 
-## Update Plugin Defaults
+### 3. 路由器配置（OpenWRT）
 
-Open the [`src/settings.ts`](./src/settings.ts) file and change the default values:
+> 该步骤是整个方案的关键，用于接管门禁专用 VLAN 网络。
 
-* `PLATFORM_NAME` - Set this to be the name of your platform. This is the name of the platform that users will use to register the plugin in the Homebridge `config.json`.
-* `PLUGIN_NAME` - Set this to be the same name you set in the [`package.json`](./package.json) file. 
+1. 光猫上通常存在一个 **绑定门禁系统的特殊接口（VLAN）**
+2. 将该接口连接至路由器的 **WAN1**
+   - **WAN0**：继续用于正常家庭宽带
+3. WAN1 配置为 **静态 IP**
+   - IP 地址填写为 **门禁 Pad 的静态 IP**
+4. 配置策略路由：
+   - 将 **门禁相关 IP 段** 路由至 WAN1
+   - 其余流量仍然走 WAN0（正常上网）
 
-Open the [`config.schema.json`](./config.schema.json) file and change the following attribute:
 
-* `pluginAlias` - set this to match the `PLATFORM_NAME` you defined in the previous step.
 
-## Build Plugin
+### 4. 配置门禁 Pad（可选）
 
-TypeScript needs to be compiled into JavaScript before it can run. The following command will compile the contents of your [`src`](./src) directory and put the resulting code into the `dist` folder.
+> 如果 **不需要门铃 / 视频通话功能**，可跳过此步骤。
 
-```
-npm run build
-```
+1. 将门禁 Pad 连接至家庭 WiFi
+2. 清除门禁 Pad 中的 **静态网络配置**
+3. 设置为 **DHCP**
+4. 在路由器中为门禁 Pad **绑定静态 IP**
+5. 配置端口转发：
+   - 将 **WAN1 的 UDP 30303** 转发至门禁 Pad
 
-## Link To Homebridge
 
-Run this command so your global install of Homebridge can discover the plugin in your development environment:
 
-```
-npm link
-```
+## 插件安装
 
-You can now start Homebridge, use the `-D` flag so you can see debug log messages in your plugin:
+### 通过 Homebridge UI 安装
 
-```
-homebridge -D
-```
+1. 打开 Homebridge 管理界面
+2. 搜索插件名称：`homebridge-taichuan-u9`
+3. 安装完成后重启 Homebridge
 
-## Watch For Changes and Build Automatically
 
-If you want to have your code compile automatically as you make changes, and restart Homebridge automatically between changes you can run:
 
-```
-npm run watch
-```
+### 配置样本
 
-This will launch an instance of Homebridge in debug mode which will restart every time you make a change to the source code. It will load the config stored in the default location under `~/.homebridge`. You may need to stop other running instances of Homebridge while using this command to prevent conflicts. You can adjust the Homebridge startup command in the [`nodemon.json`](./nodemon.json) file.
-
-## Customise Plugin
-
-You can now start customising the plugin template to suit your requirements.
-
-* [`src/platform.ts`](./src/platform.ts) - this is where your device setup and discovery should go.
-* [`src/platformAccessory.ts`](./src/platformAccessory.ts) - this is where your accessory control logic should go, you can rename or create multiple instances of this file for each accessory type you need to implement as part of your platform plugin. You can refer to the [developer documentation](https://developers.homebridge.io/) to see what characteristics you need to implement for each service type.
-* [`config.schema.json`](./config.schema.json) - update the config schema to match the config you expect from the user. See the [Plugin Config Schema Documentation](https://developers.homebridge.io/#/config-schema).
-
-## Versioning Your Plugin
-
-Given a version number `MAJOR`.`MINOR`.`PATCH`, such as `1.4.3`, increment the:
-
-1. **MAJOR** version when you make breaking changes to your plugin,
-2. **MINOR** version when you add functionality in a backwards compatible manner, and
-3. **PATCH** version when you make backwards compatible bug fixes.
-
-You can use the `npm version` command to help you with this:
-
-```bash
-# major update / breaking changes
-npm version major
-
-# minor update / new features
-npm version update
-
-# patch / bugfixes
-npm version patch
+```json
+{
+    "accessory": "U9AccessControl",
+    "name": "车库门禁",
+    "ip": "172.16.2.1"
+}
 ```
 
-## Publish Package
+## 工作原理说明
 
-When you are ready to publish your plugin to [npm](https://www.npmjs.com/), make sure you have removed the `private` attribute from the [`package.json`](./package.json) file then run:
+> 太川门禁系统 **必须在呼叫状态下才能解锁**
 
-```
-npm publish
-```
+插件在解锁流程中会按顺序执行：
 
-If you are publishing a scoped plugin, i.e. `@username/homebridge-xxx` you will need to add `--access=public` to command the first time you publish.
+1. 向门禁发起 **模拟呼叫**
+2. 短暂等待系统进入可解锁状态
+3. 发送 **解锁指令**
+4. 门禁执行开门动作
 
-#### Publishing Beta Versions
-
-You can publish *beta* versions of your plugin for other users to test before you release it to everyone.
-
-```bash
-# create a new pre-release version (eg. 2.1.0-beta.1)
-npm version prepatch --preid beta
-
-# publsh to @beta
-npm publish --tag=beta
-```
-
-Users can then install the  *beta* version by appending `@beta` to the install command, for example:
-
-```
-sudo npm install -g homebridge-example-plugin@beta
-```
+整个过程对 HomeKit 用户而言表现为一次普通的“解锁”操作。
 
 
+
+## 注意事项
+
+* 门禁 IP、路由配置错误将导致无法解锁
+* 某些小区 VLAN 配置存在差异，请自行确认光猫端口用途
+* 本插件仅用于 **个人合法使用场景**
+
+
+
+## 免责声明
+
+本项目仅用于技术研究与个人自用，请确保你的使用行为 **符合当地法律法规及物业管理规定**。
+作者不对因不当使用造成的任何后果负责。
+
+
+
+## License
+
+MIT

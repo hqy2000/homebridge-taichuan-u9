@@ -1,15 +1,21 @@
 {
-  "pluginAlias": "ExampleHomebridgePlugin",
+  "pluginAlias": "U9AccessControl",
   "pluginType": "platform",
   "singular": true,
   "schema": {
     "type": "object",
     "properties": {
       "name": {
-        "title": "Name",
+        "title": "门禁名称",
         "type": "string",
         "required": true,
-        "default": "Example Dynamic Platform"
+        "default": "小区门禁"
+      },
+      "ip": {
+        "title": "IP地址",
+        "type": "string",
+        "required": true,
+        "default": "172.16.0.1"
       }
     }
   }
