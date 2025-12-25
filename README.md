@@ -53,6 +53,7 @@
    - 将 **门禁相关 IP 段** 路由至 WAN1
    - 其余流量仍然走 WAN0（正常上网）
 
+<img width="931" height="251" alt="Dual WAN" src="https://github.com/user-attachments/assets/1e90c8ff-554e-4077-bac3-327cfb0c9b08" />
 
 
 ### 4. 配置门禁 Pad（可选）
@@ -64,8 +65,9 @@
 3. 设置为 **DHCP**
 4. 在路由器中为门禁 Pad **绑定静态 IP**
 5. 配置端口转发：
-   - 将 **WAN1 的 UDP 30303** 转发至门禁 Pad
-
+   - 将 **WAN1 的 所有端口** 均转发至门禁 Pad
+   
+<img width="965" height="410" alt="Firewall" src="https://github.com/user-attachments/assets/20954694-302e-4871-9730-9f0be50fb11e" />
 
 
 ## 插件安装
